@@ -25,8 +25,9 @@ const char * CmdTest::getDesc(){
 	return xDesc;
 }
 
-void CmdTest::execute(Request *req){
+void CmdTest::execute(TelegramInterface *bot, int64_t chatId){
 	printf("Execute Cmd Test\n");
+	bot->sendMessage(chatId, "This is a test. See if this works");
 }
 
 

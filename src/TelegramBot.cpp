@@ -12,9 +12,10 @@
 
 TelegramBot::TelegramBot(char *buf, size_t len) {
 	pBuffer = buf;
-	xBufferLen = len;
+	xBufferLen = len = 1024;
 
 	pRequest = new 	Request(pBuffer, xBufferLen);
+	pMessage = new Request(&pBuffer[xBufferLen], 1024);
 
 	xCmds.addCmd(&xCmdTest);
 
@@ -22,7 +23,10 @@ TelegramBot::TelegramBot(char *buf, size_t len) {
 
 TelegramBot::~TelegramBot() {
 	delete(pRequest);
+	delete(pMessage);
+
 }
+
 
 
 
@@ -82,9 +86,10 @@ bool TelegramBot::doUpdate(){
 								"/getUpdates";
 	json_t pool[MAX_TAGS];
 	char offset[20];
+	int64_t chatId = 0;
 
 	std::map<std::string, std::string> query;
-	query["limit"] = "5";
+	query["limit"] = "1";
 	if (xOffset != 0){
 		sprintf(offset, "%d", xOffset+1);
 		query["offset"] = offset;
@@ -119,11 +124,32 @@ bool TelegramBot::doUpdate(){
 
 					json_t const* msg =  json_getProperty( item, "message" );
 					if (msg != NULL ){
+
+						json_t const* chat =  json_getProperty( msg, "chat" );
+						if (chat != NULL){
+							json_t const* id =  json_getProperty( chat, "id" );
+							if (id != NULL){
+								chatId = json_getInteger(id);
+							}
+						}
+
+
 						json_t const* text =  json_getProperty( msg, "text" );
 						if (text != NULL){
 							const char *txt = json_getValue(text);
 							if (txt != NULL){
 								printf("Text Command is %s\n", txt);
+
+								TelegramBotCmd * cmd = xCmds.getCmd(txt);
+								if (cmd != NULL){
+									cmd->execute(this, chatId);
+								} else {
+									printf("Unknown cmd %s\n", txt);
+									if (chatId != 0){
+										sendMessage(chatId, "Unknown command");
+										//printf("Chat ID %lld\n", chatId);
+									}
+								}
 							}
 						}
 					}
@@ -140,4 +166,33 @@ bool TelegramBot::doUpdate(){
 	}
 
 	return res;
+}
+
+
+bool TelegramBot::sendMessage(int64_t chatId, const char * msg){
+	char url[] = "https://api.telegram.org/bot"
+									TELEGRAMBOTKEY
+									"/sendMessage";
+		char chat[100];
+		std::map<std::string, std::string> query;
+
+		sprintf(chat,"%lld", chatId);
+		query["chat_id"] = chat;
+		query["text"]=msg;
+
+		int res = pMessage->get(url, &query);
+
+		if ( res ){
+			res = (pMessage->getStatusCode() == 200);
+		}
+
+		if (res){
+			printf("WS: %.*s\n",
+					pMessage->getPayloadLen(),
+					pMessage->getPayload());
+		} else {
+			printf("WS Failed %d\n", pMessage->getStatusCode() );
+			printf("URL: %s\n", pMessage->getUriChar());
+		}
+		return res;
 }

@@ -11,6 +11,7 @@
 #include "TelegramBotCmd.h"
 #include "JSONSerialisable.h"
 #include <map>
+#include <string>
 
 #define JSON_BUF_LEN  256
 

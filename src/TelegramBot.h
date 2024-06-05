@@ -14,10 +14,12 @@
 
 #include "Agent.h"
 #include "Request.h"
+#include "TelegramInterface.h"
 #include "TelegramBotCmds.h"
 #include "CmdTest.h"
 
-class TelegramBot : public Agent {
+
+class TelegramBot : public Agent, public TelegramInterface {
 public:
 	TelegramBot(char *buf, size_t len);
 	virtual ~TelegramBot();
@@ -27,6 +29,7 @@ public:
 
 	bool doUpdate();
 
+	virtual bool sendMessage(int64_t chatId, const char * msg);
 
 
 protected:
@@ -44,7 +47,8 @@ protected:
 	virtual configSTACK_DEPTH_TYPE getMaxStackSize();
 
 private:
-	Request *pRequest = NULL;
+	Request *pRequest  = NULL;
+	Request *pMessage = NULL;
 
 	TelegramBotCmds xCmds;
 	char *pBuffer = NULL;

@@ -18,7 +18,7 @@ public:
 	virtual const char * getId();
 	virtual const char * getDesc();
 
-	virtual void execute(Request *req);
+	virtual void execute(TelegramInterface *bot, int64_t chatId);
 
 private:
 

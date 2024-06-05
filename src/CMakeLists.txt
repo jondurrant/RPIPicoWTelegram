@@ -6,6 +6,7 @@ add_executable(${NAME}
         TelegramBotCmd.cpp
         TelegramBotCmds.cpp
         CmdTest.cpp
+        TelegramInterface.cpp
         )
 
 # Pull in our pico_stdlib which pulls in commonly used features
