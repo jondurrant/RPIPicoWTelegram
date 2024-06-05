@@ -147,11 +147,12 @@ void main_task(void* params){
 	printf("IP ADDRESS: %s\n", ipStr);
 
 
+	/*
 	char url[] = "https://api.telegram.org/bot"
 							TELEGRAMBOTKEY
 						   "/getUpdates";
 
-	char pBuffer[BUF_LEN];
+
 	Request req(pBuffer, BUF_LEN);
 
 	int res = req.get(url);
@@ -163,8 +164,9 @@ void main_task(void* params){
 	} else {
 		printf("WS Failed %d\n", req.getStatusCode() );
 	}
+	*/
 
-
+	char pBuffer[BUF_LEN];
 	TelegramBot bot(pBuffer, BUF_LEN);
 	bot.start("Bot", TASK_PRIORITY);
 

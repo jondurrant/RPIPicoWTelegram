@@ -25,6 +25,8 @@ public:
 
 	bool sendCommands();
 
+	bool doUpdate();
+
 
 
 protected:
@@ -49,6 +51,8 @@ private:
 	size_t xBufferLen = 0;
 
 	CmdTest xCmdTest;
+
+	uint xOffset = 0;
 };
 
 #endif /* SRC_TELEGRAMBOT_H_ */
