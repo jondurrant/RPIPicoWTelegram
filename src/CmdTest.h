@@ -1,6 +1,8 @@
 /*
  * CmdTest.h
  *
+ * Telegram command to get a test msg
+ *
  *  Created on: 5 Jun 2024
  *      Author: jondurrant
  */

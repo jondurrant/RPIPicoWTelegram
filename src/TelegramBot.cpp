@@ -87,9 +87,10 @@ bool TelegramBot::doUpdate(){
 	json_t pool[MAX_TAGS];
 	char offset[20];
 	int64_t chatId = 0;
+	int64_t fromId = 0;
 
 	std::map<std::string, std::string> query;
-	query["limit"] = "1";
+	query["limit"] = "5";
 	if (xOffset != 0){
 		sprintf(offset, "%d", xOffset+1);
 		query["offset"] = offset;
@@ -113,18 +114,34 @@ bool TelegramBot::doUpdate(){
 						pool,
 						MAX_TAGS);
 		if ( parent != NULL ){
+			//Results
 			json_t const* result = json_getProperty( parent, "result" );
 			if (result != NULL){
 				json_t const * item = json_getChild(result);
 				while (item != NULL){
+					fromId = 0;
+					chatId = 0;
+
 					json_t const* update =  json_getProperty( item, "update_id" );
 					if (update != NULL){
 						xOffset = json_getInteger(update);
 					}
 
+					//Message
 					json_t const* msg =  json_getProperty( item, "message" );
 					if (msg != NULL ){
 
+						//From ID
+						json_t const* from =  json_getProperty( msg, "from" );
+						if (from != NULL){
+							json_t const* id =  json_getProperty( from, "id" );
+							if (id != NULL){
+								fromId = json_getInteger(id);
+
+							}
+						}
+
+						//Chat ID
 						json_t const* chat =  json_getProperty( msg, "chat" );
 						if (chat != NULL){
 							json_t const* id =  json_getProperty( chat, "id" );
@@ -133,26 +150,29 @@ bool TelegramBot::doUpdate(){
 							}
 						}
 
+						if (isAuthorised(fromId)){
+							//Message
+							json_t const* text =  json_getProperty( msg, "text" );
+							if (text != NULL){
+								const char *txt = json_getValue(text);
+								if (txt != NULL){
+									printf("Text Command is %s\n", txt);
 
-						json_t const* text =  json_getProperty( msg, "text" );
-						if (text != NULL){
-							const char *txt = json_getValue(text);
-							if (txt != NULL){
-								printf("Text Command is %s\n", txt);
-
-								TelegramBotCmd * cmd = xCmds.getCmd(txt);
-								if (cmd != NULL){
-									cmd->execute(this, chatId);
-								} else {
-									printf("Unknown cmd %s\n", txt);
-									if (chatId != 0){
-										sendMessage(chatId, "Unknown command");
-										//printf("Chat ID %lld\n", chatId);
+									TelegramBotCmd * cmd = xCmds.getCmd(txt);
+									if (cmd != NULL){
+										cmd->execute(this, chatId);
+									} else {
+										printf("Unknown cmd %s\n", txt);
+										if (chatId != 0){
+											sendMessage(chatId, "Unknown command");
+											//printf("Chat ID %lld\n", chatId);
+										}
 									}
 								}
 							}
-						}
-					}
+						} //Authotised
+
+					} //White
 					item = json_getSibling(item);
 				}
 			}
@@ -195,4 +215,21 @@ bool TelegramBot::sendMessage(int64_t chatId, const char * msg){
 			printf("URL: %s\n", pMessage->getUriChar());
 		}
 		return res;
+}
+
+bool TelegramBot::isAuthorised(uint64_t fromId){
+	if (fromId == TELEGRAMBOTAUTH){
+		printf("Authorising user %lld\n", fromId);
+		return true;
+	}
+	printf("Unauthorising user %lld\n", fromId);
+	return false;
+}
+
+void TelegramBot::addCmd(TelegramBotCmd *cmd){
+	xCmds.addCmd(cmd);
+}
+
+void TelegramBot::delCmd(TelegramBotCmd *cmd){
+	xCmds.delCmd(cmd);
 }

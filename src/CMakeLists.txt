@@ -7,6 +7,7 @@ add_executable(${NAME}
         TelegramBotCmds.cpp
         CmdTest.cpp
         TelegramInterface.cpp
+        CmdTemperature.cpp
         )
 
 # Pull in our pico_stdlib which pulls in commonly used features
@@ -22,6 +23,7 @@ target_link_libraries(${NAME}
      tiny_json
      wolfssl
      picow_wsclient
+     hardware_adc
 	)
 	
 target_include_directories(${NAME} PRIVATE
@@ -44,6 +46,7 @@ target_compile_definitions(${NAME} PRIVATE
     WIFI_PASSWORD=\"$ENV{WIFI_PASSWORD}\"
     CYW43_HOST_NAME="DrJonEA"
     TELEGRAMBOTKEY=\"$ENV{TELEGRAMBOTKEY}\"
+    TELEGRAMBOTAUTH=$ENV{TELEGRAMBOTAUTH}
 )
 
 # create map/bin/hex file etc.

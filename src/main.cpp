@@ -1,5 +1,6 @@
 /***
- * main.cpp - HTTP Get over socket
+ * main.cpp
+ * Telegram Bot API example from a Raspberry PI Pico W
  * Jon Durrant
  * 4-Oct-2022
  *
@@ -24,6 +25,7 @@
 
 #include "BlinkAgent.h"
 #include "TelegramBot.h"
+#include "CmdTemperature.h"
 
 
 //Check these definitions where added from the makefile
@@ -147,27 +149,10 @@ void main_task(void* params){
 	printf("IP ADDRESS: %s\n", ipStr);
 
 
-	/*
-	char url[] = "https://api.telegram.org/bot"
-							TELEGRAMBOTKEY
-						   "/getUpdates";
-
-
-	Request req(pBuffer, BUF_LEN);
-
-	int res = req.get(url);
-	if ( res ){
-		res = (req.getStatusCode() == 200);
-	}
-	if (res){
-		printf("WS: %.*s\n", req.getPayloadLen(), req.getPayload());
-	} else {
-		printf("WS Failed %d\n", req.getStatusCode() );
-	}
-	*/
-
 	char pBuffer[BUF_LEN];
 	TelegramBot bot(pBuffer, BUF_LEN);
+	CmdTemperature cmdTemp;
+	bot.addCmd(&cmdTemp);
 	bot.start("Bot", TASK_PRIORITY);
 
 
